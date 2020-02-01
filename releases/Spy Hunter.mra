@@ -10,7 +10,7 @@
 		<dip bits="1"    name="Demo Sounds" ids="Off,On"/>
 		<dip bits="8"    name="Service" ids="Off,On"/>
 	</switches>
-	<buttons names="Machine Guns,Missiles,Smoke Screen,Oil Slick,Van/Start,Gear Shift,Coin" default="A,B,C,D,Start,R,Select"/>
+	<buttons names="Machine Guns,Missiles,Smoke Screen,Oil Slick,Van/Start,Gear Shift,Coin" default="A,B,X,Y,Start,R,Select"/>
 	<rom index="1">
 		<part>0</part>
 	</rom>
