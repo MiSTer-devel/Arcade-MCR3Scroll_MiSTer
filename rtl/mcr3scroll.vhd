@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------
--- Spy hunter by Dar (darfpga@aol.fr) (06/12/2019)
+-- MCR3Scroll by Dar (darfpga@aol.fr) (06/12/2019)
 -- http://darfpga.blogspot.fr
 ---------------------------------------------------------------------------------
 --
@@ -31,12 +31,7 @@
 --   Coctail mode : NO
 --   Sound        : OK - missing cheap/chip squeak deluxe board
 
---  Use with MAME roms from spyhunt.zip
---
---  Use make_spyhunt_proms.bat to build vhd file from binaries
---  (CRC list included)
-
---  Spy hunter (midway mcr) Hardware caracteristics :
+--  MCR3Scroll (midway mcr) Hardware caracteristics :
 --
 --  VIDEO : 1xZ80@3MHz CPU accessing its program rom, working ram,
 --    sprite data ram, I/O, sound board register and trigger.
@@ -134,7 +129,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
-entity spy_hunter is
+entity mcr3scroll is
 port(
   clock_40       : in  std_logic;
   reset          : in  std_logic;
@@ -178,9 +173,9 @@ port(
   dl_data        : in std_logic_vector( 7 downto 0);
   dl_wr          : in std_logic
  );
-end spy_hunter;
+end mcr3scroll;
 
-architecture struct of spy_hunter is
+architecture struct of mcr3scroll is
 
  signal reset_n   : std_logic;
  signal clock_vid : std_logic;
@@ -1075,8 +1070,7 @@ port map(
  q_b    => palette_do
 );
 
--- Spy hunter sound board 
-sound_board : entity work.spy_hunter_sound_board
+sound_board : entity work.mcr_sound_board
 port map(
  clock_40    => clock_40,
  reset       => reset,

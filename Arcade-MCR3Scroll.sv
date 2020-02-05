@@ -485,7 +485,7 @@ wire  [9:0] csd_audio;
 assign AUDIO_L = audio_l + { csd_audio, 5'd0 };
 assign AUDIO_R = audio_r + { csd_audio, 5'd0 };
 
-spy_hunter spy_hunter
+mcr3scroll mcr3scroll
 (
 	.clock_40(clk_sys),
 	.reset(reset),
@@ -532,9 +532,9 @@ spy_hunter spy_hunter
 wire  [7:0] steering_ana, steering_emu;
 wire  [7:0] gas_ana, gas_emu;
 
-spy_hunter_control spy_hunter_control
+steering_control steering_control
 (
-	.clock_40(clk_sys),
+	.clk(clk_sys),
 	.reset(reset),
 	.vsync(vs),
 	.gas_plus(m_up),
@@ -550,13 +550,12 @@ assign gas_ana = {gas[6:0], 1'b1};
 assign steering_ana = {joy_a[7],joy_a[7:1]} + 8'h70;
 
 wire [7:0] spin_angle;
-spinner spinner (
-	.clock_40(clk_sys),
+spinner #(-10) spinner (
+	.clk(clk_sys),
 	.reset(reset),
-	.btn_acc(0),
-	.btn_left(m_left),
-	.btn_right(m_right),
-	.ctc_zc_to_2(vs),
+	.minus(m_left),
+	.plus(m_right),
+	.strobe(vs),
 	.use_spinner(status[10]),
 	.spin_angle(spin_angle)
 );
