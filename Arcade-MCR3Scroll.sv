@@ -1,5 +1,5 @@
 //============================================================================
-//  Arcade: Spy Hunter
+//  Arcade: MCR3SCROLL
 //
 //  Port to MiSTer
 //  Copyright (C) 2019 Sorgelig
@@ -305,10 +305,10 @@ always @(posedge clk_sys) begin
 			//'h06: btn_start2        <= pressed; // F2
 			//'h04: btn_start3        <= pressed; // F3
 			//'h0C: btn_start4        <= pressed; // F4
-			'h12: btn_fireD         <= pressed; // l-shift
-			'h14: btn_fireC         <= pressed; // ctrl
+			'h14: btn_fireA         <= pressed; // l-ctrl
 			'h11: btn_fireB         <= pressed; // alt
-			'h29: btn_fireA         <= pressed; // Space
+			'h29: btn_fireC         <= pressed; // Space
+			'h12: btn_fireD         <= pressed; // l-shift
 			'h1A: btn_fireE         <= pressed; // Z	
 			'h22: btn_shift         <= pressed; // X	
 			// JPAC/IPAC/MAME Style Codes
