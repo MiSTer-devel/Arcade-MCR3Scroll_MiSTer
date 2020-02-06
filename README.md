@@ -40,12 +40,29 @@ Supports digital and analog Steering, Gas.
 
 ### Crater Raider
 Up to 2 players. Supports 2 control modes: Joystick/Spinner
-1. Up/Down/Left/Right - movements, A - Fire, B - Shield, E - START2, F - START1
-2. Left/Right - Spinner, Up - Forward, Down - Reverse, A - Fire, B - Shield, E - START2, F - START1 
+1. Joystick
+* Up/Down/Left/Right - movements
+* A - Fire
+* B - Shield
+* E - START2
+* F - START1
+2. Spinner
+* Left/Right - Spinner
+* Up - Forward
+* Down - Reverse
+* A - Fire
+* B - Shield
+* E - START2
+* F - START1 
  
 ### Turbo Tag 
  Up to 2 players. Supports digital and analog Steering, Gas.
-Left/Right - Steering, A - LButton/1Player, B - LTrigger, C - Center Button, D- RButton/2Player, E - RTrigger
+* Left/Right - Steering
+* A - LButton/1Player
+* B - LTrigger
+* C - Center Button
+* D- RButton/2Player
+* E - RTrigger
  
 # ROMs
 ```
