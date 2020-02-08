@@ -41,6 +41,6 @@
 		<part name="ttbg2.bin"/>
 		<part name="ttbg3.bin"/>
 		<part name="ttan.bin"/>
-		<patch offset="0x0B2C">18</patch> <!-- accorsing to mame /-->
+		<patch offset="0x0B2C">18</patch> <!-- according to mame /-->
 	</rom>
 </misterromdescription>
