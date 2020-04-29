@@ -1,10 +1,12 @@
 <misterromdescription>
-	<name>Turbo Tag</name>
-	<mameversion>0216</mameversion>
-	<mratimestamp>201912310000</mratimestamp>
-	<manufacturer>Bally Midway</manufacturer>
-	<rbf>mcr3scroll</rbf>
+	<name>Turbo Tag (prototype)</name>
+	<mameversion>0220</mameversion>
 	<setname>turbotag</setname>
+	<mratimestamp>20200427161917</mratimestamp>
+	<year>1985</year>
+	<manufacturer>Bally Midway</manufacturer>
+	<category>Racing / Demolition</category>
+	<rbf>mcr3scroll</rbf>
 	<switches default="FF 00">
 		<dip bits="1"    name="Demo Sounds" ids="Off,On"/>
 		<dip bits="8"    name="Service" ids="Off,On"/>
@@ -13,34 +15,34 @@
 	<rom index="1">
 		<part>1</part>
 	</rom>
-	<rom index="0" zip="turbotag.zip" md5="ea404788ed5956a50c3c1a5858f5548b" type="merged|nonmerged">
-		<part name="ttprog0.bin"/>
-		<part name="ttprog1.bin"/>
-		<part name="ttprog2.bin"/>
-		<part name="ttprog3.bin"/>
-		<part name="ttprog4.bin"/>
-		<part name="ttprog5.bin"/>
-		<part name="ttprog5.bin"/>
+	<rom index="0" zip="turbotag.zip" md5="ea404788ed5956a50c3c1a5858f5548b">
+		<part crc="6110fd80" name="ttprog0.bin"/>
+		<part crc="b0505e18" name="ttprog1.bin"/>
+		<part crc="c4141237" name="ttprog2.bin"/>
+		<part crc="af294c6e" name="ttprog3.bin"/>
+		<part crc="8c5bc1a4" name="ttprog4.bin"/>
+		<part crc="11e62fe4" name="ttprog5.bin"/>
+		<part crc="11e62fe4" name="ttprog5.bin"/>
 		<part repeat="8192">00</part>
-		<part name="ttu17.bin"/>
-		<part name="ttu18.bin"/>
-		<part name="ttu7.bin"/>
-		<part name="ttu8.bin"/>
+		<part crc="605d6c74" name="ttu17.bin"/>
+		<part crc="bb25852c" name="ttu18.bin"/>
+		<part crc="8ebb3302" name="ttu7.bin"/>
+		<part crc="6bfcb22a" name="ttu8.bin"/>
 		<interleave output="32">
-			<part name="ttfg1.bin" map="0001"/>
-			<part name="ttfg0.bin" map="0001"/>
-			<part name="ttfg3.bin" map="0010"/>
-			<part name="ttfg2.bin" map="0010"/>
-			<part name="ttfg5.bin" map="0100"/>
-			<part name="ttfg4.bin" map="0100"/>
-			<part name="ttfg7.bin" map="1000"/>
-			<part name="ttfg6.bin" map="1000"/>
+			<part crc="9d7e6ebc" name="ttfg1.bin"/>
+			<part crc="ed69e1a8" name="ttfg0.bin"/>
+			<part crc="74e21c1c" name="ttfg3.bin"/>
+			<part crc="037ec6fc" name="ttfg2.bin"/>
+			<part crc="8b718879" name="ttfg5.bin"/>
+			<part crc="6fdb0c13" name="ttfg4.bin"/>
+			<part crc="212019dc" name="ttfg7.bin"/>
+			<part crc="4094e996" name="ttfg6.bin"/>
 		</interleave>
-		<part name="ttbg0.bin"/>
-		<part name="ttbg1.bin"/>
-		<part name="ttbg2.bin"/>
-		<part name="ttbg3.bin"/>
-		<part name="ttan.bin"/>
-		<patch offset="0x0B2C">18</patch> <!-- according to mame /-->
+		<part crc="1cd2023f" name="ttbg0.bin"/>
+		<part crc="784e84cd" name="ttbg1.bin"/>
+		<part crc="da9d47d2" name="ttbg2.bin"/>
+		<part crc="367e06a5" name="ttbg3.bin"/>
+		<part crc="aa0b1471" name="ttan.bin"/>
+		<patch offset="0x0B2C">18</patch>
 	</rom>
 </misterromdescription>
