@@ -134,8 +134,8 @@ assign LED_POWER = 0;
 
 wire [1:0] ar = status[15:14];
 
-assign VIDEO_ARX = (!ar) ? ((status[2] | landscape) ? 8'd4 : 8'd3) : (ar - 1'd1);
-assign VIDEO_ARY = (!ar) ? ((status[2] | landscape) ? 8'd3 : 8'd4) : 12'd0;
+assign VIDEO_ARX = (!ar) ? (landscape ? 8'd21 : status[2] ? 8'd5 : 8'd4) : (ar - 1'd1);
+assign VIDEO_ARY = (!ar) ? (landscape ? 8'd20 : status[2] ? 8'd4 : 8'd5) : 12'd0;
 
 `include "build_id.v" 
 localparam CONF_STR = {
@@ -143,7 +143,7 @@ localparam CONF_STR = {
 	"H0OEF,Aspect ratio,Original,Full Screen,[ARC1],[ARC2];",
 	"H3H0O2,Orientation,Vert,Horz;",
 	"O35,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
-	"OD,Deinterlacer hi-res,Off,On;",
+	"D4OD,Deinterlacer Hi-Res,Off,On;",
 	"-;",
 	"H2OA,Accelerator,Digital,Analog;",
 	"H2OBC,Steering,Digital,Analog X,Paddle;",
@@ -202,7 +202,7 @@ hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
 
 	.buttons(buttons),
 	.status(status),
-	.status_menumask({landscape,mod_crater,mod_spyhnt,direct_video}),
+	.status_menumask({|status[5:3],landscape,mod_crater,mod_spyhnt,direct_video}),
 	.forced_scandoubler(forced_scandoubler),
 	.gamma_bus(gamma_bus),
 	.direct_video(direct_video),
@@ -503,7 +503,7 @@ mcr3scroll mcr3scroll
 	.video_hs(hs),
 	.video_vs(vs),
 	.video_ce(ce_pix_old),
-	.tv15Khz_mode(~status[13]),
+	.tv15Khz_mode(~status[13] || status[5:3]),
 
 	.mod_crater(mod_crater),
 	.mod_turbo(mod_turbo),
