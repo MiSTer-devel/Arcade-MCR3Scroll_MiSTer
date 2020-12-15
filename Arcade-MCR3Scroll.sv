@@ -451,8 +451,7 @@ always @(*) begin
 	end
 end
 
-wire ce_pix_old;
-wire ce_pix;
+reg  ce_pix;
 wire hblank, vblank;
 wire hs, vs;
 wire [2:0] r,g;
@@ -462,19 +461,22 @@ wire rotate_ccw = 1'b0;
 wire no_rotate = status[2] | direct_video | landscape;
 screen_rotate screen_rotate (.*);
 
-always @(posedge clk_sys) begin
-        reg [2:0] div;
+wire hires = status[13] && !status[5:3];
 
-        div <= div + 1'd1;
-        ce_pix <= !div;
+always @(posedge clk_80M) begin
+	reg [2:0] div;
+
+	div <= div + 1'd1;
+	ce_pix <= hires ? !div[1:0] : !div;
 end
+
 // 512x480
 arcade_video #(496,9) arcade_video
 (
 	.*,
 
-	.ce_pix(status[13] ? ce_pix_old: ce_pix),
-	.clk_video(clk_sys),
+	.ce_pix(ce_pix),
+	.clk_video(clk_80M),
 	.RGB_in({r,g,b}),
 	.HBlank(hblank),
 	.VBlank(vblank),
@@ -502,8 +504,7 @@ mcr3scroll mcr3scroll
 	.video_hblank(hblank),
 	.video_hs(hs),
 	.video_vs(vs),
-	.video_ce(ce_pix_old),
-	.tv15Khz_mode(~status[13] || status[5:3]),
+	.tv15Khz_mode(~hires),
 
 	.mod_crater(mod_crater),
 	.mod_turbo(mod_turbo),
