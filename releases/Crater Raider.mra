@@ -42,4 +42,5 @@
 		<part crc="d0659042" name="crcpu.6a"/>
 		<part crc="6fe53c8d" name="crcpu.10g"/>
 	</rom>
+	<nvram index="4" size="2048"/>
 </misterromdescription>

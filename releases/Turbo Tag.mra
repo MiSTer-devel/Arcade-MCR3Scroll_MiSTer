@@ -45,4 +45,5 @@
 		<part crc="aa0b1471" name="ttan.bin"/>
 		<patch offset="0x0B2C">18</patch>
 	</rom>
+	<nvram index="4" size="2048"/>
 </misterromdescription>
