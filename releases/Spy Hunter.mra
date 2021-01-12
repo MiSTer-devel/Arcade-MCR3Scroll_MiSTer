@@ -46,4 +46,5 @@
 		<part crc="7b482d61" name="spy-hunter_cpu_bg3_11-18-83.6a"/>
 		<part crc="936dc87f" name="spy-hunter_cpu_alpha-n_11-18-83"/>
 	</rom>
+	<nvram index="4" size="2048"/>
 </misterromdescription>
