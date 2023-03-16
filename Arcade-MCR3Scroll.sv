@@ -29,7 +29,7 @@ module emu
 	input         RESET,
 
 	//Must be passed to hps_io module
-	inout  [45:0] HPS_BUS,
+	inout  [48:0] HPS_BUS,
 
 	//Base video clock. Usually equals to CLK_SYS.
 	output        CLK_VIDEO,
@@ -39,8 +39,9 @@ module emu
 	output        CE_PIXEL,
 
 	//Video aspect ratio for HDMI. Most retro systems have ratio 4:3.
-	output [11:0] VIDEO_ARX,
-	output [11:0] VIDEO_ARY,
+	//if VIDEO_ARX[12] or VIDEO_ARY[12] is set then [11:0] contains scaled size instead of aspect ratio.
+	output [12:0] VIDEO_ARX,
+	output [12:0] VIDEO_ARY,
 
 	output  [7:0] VGA_R,
 	output  [7:0] VGA_G,
@@ -51,14 +52,20 @@ module emu
 	output        VGA_F1,
 	output [1:0]  VGA_SL,
 	output        VGA_SCALER, // Force VGA scaler
+	output 		  VGA_DISABLE,
 
-	// Use framebuffer from DDRAM (USE_FB=1 in qsf)
+	input  [11:0] HDMI_WIDTH,
+	input  [11:0] HDMI_HEIGHT,
+	output        HDMI_FREEZE,
+
+`ifdef MISTER_FB
+	// Use framebuffer in DDRAM (USE_FB=1 in qsf)
 	// FB_FORMAT:
 	//    [2:0] : 011=8bpp(palette) 100=16bpp 101=24bpp 110=32bpp
 	//    [3]   : 0=16bits 565 1=16bits 1555
 	//    [4]   : 0=RGB  1=BGR (for 16/24/32 modes)
 	//
-	// FB_STRIDE either 0 (rounded to 256 bytes) or multiple of 16 bytes.
+	// FB_STRIDE either 0 (rounded to 256 bytes) or multiple of pixel size (in bytes)
 	output        FB_EN,
 	output  [4:0] FB_FORMAT,
 	output [11:0] FB_WIDTH,
@@ -69,6 +76,7 @@ module emu
 	input         FB_LL,
 	output        FB_FORCE_BLANK,
 
+`ifdef MISTER_FB_PALETTE
 	// Palette control for 8bit modes.
 	// Ignored for other video modes.
 	output        FB_PAL_CLK,
@@ -76,6 +84,8 @@ module emu
 	output [23:0] FB_PAL_DOUT,
 	input  [23:0] FB_PAL_DIN,
 	output        FB_PAL_WR,
+`endif
+`endif
 
 	output        LED_USER,  // 1 - ON, 0 - OFF.
 
@@ -85,23 +95,26 @@ module emu
 	output  [1:0] LED_POWER,
 	output  [1:0] LED_DISK,
 
+	// I/O board button press simulation (active high)
+	// b[1]: user button
+	// b[0]: osd button
+	output  [1:0] BUTTONS,
+
 	input         CLK_AUDIO, // 24.576 MHz
 	output [15:0] AUDIO_L,
 	output [15:0] AUDIO_R,
-	output        AUDIO_S,    // 1 - signed audio samples, 0 - unsigned
+	output        AUDIO_S,   // 1 - signed audio samples, 0 - unsigned
+	output  [1:0] AUDIO_MIX, // 0 - no mix, 1 - 25%, 2 - 50%, 3 - 100% (mono)
 
-	//SDRAM interface with lower latency
-	output        SDRAM_CLK,
-	output        SDRAM_CKE,
-	output [12:0] SDRAM_A,
-	output  [1:0] SDRAM_BA,
-	inout  [15:0] SDRAM_DQ,
-	output        SDRAM_DQML,
-	output        SDRAM_DQMH,
-	output        SDRAM_nCS,
-	output        SDRAM_nCAS,
-	output        SDRAM_nRAS,
-	output        SDRAM_nWE, 
+	//ADC
+	inout   [3:0] ADC_BUS,
+
+	//SD-SPI
+	output        SD_SCK,
+	output        SD_MOSI,
+	input         SD_MISO,
+	output        SD_CS,
+	input         SD_CD,
 
 	//High latency DDR3 RAM interface
 	//Use for non-critical time purposes
@@ -116,21 +129,70 @@ module emu
 	output  [7:0] DDRAM_BE,
 	output        DDRAM_WE,
 
+	//SDRAM interface with lower latency
+	output        SDRAM_CLK,
+	output        SDRAM_CKE,
+	output [12:0] SDRAM_A,
+	output  [1:0] SDRAM_BA,
+	inout  [15:0] SDRAM_DQ,
+	output        SDRAM_DQML,
+	output        SDRAM_DQMH,
+	output        SDRAM_nCS,
+	output        SDRAM_nCAS,
+	output        SDRAM_nRAS,
+	output        SDRAM_nWE,
+
+`ifdef MISTER_DUAL_SDRAM
+	//Secondary SDRAM
+	//Set all output SDRAM_* signals to Z ASAP if SDRAM2_EN is 0
+	input         SDRAM2_EN,
+	output        SDRAM2_CLK,
+	output [12:0] SDRAM2_A,
+	output  [1:0] SDRAM2_BA,
+	inout  [15:0] SDRAM2_DQ,
+	output        SDRAM2_nCS,
+	output        SDRAM2_nCAS,
+	output        SDRAM2_nRAS,
+	output        SDRAM2_nWE,
+`endif
+
+	input         UART_CTS,
+	output        UART_RTS,
+	input         UART_RXD,
+	output        UART_TXD,
+	output        UART_DTR,
+	input         UART_DSR,
+
 	// Open-drain User port.
 	// 0 - D+/RX
 	// 1 - D-/TX
 	// 2..6 - USR2..USR6
 	// Set USER_OUT to 1 to read from USER_IN.
 	input   [6:0] USER_IN,
-	output  [6:0] USER_OUT
+	output  [6:0] USER_OUT,
+
+	input         OSD_STATUS
 );
 
-assign VGA_F1    = 0;
-assign VGA_SCALER= 0;
-assign USER_OUT  = '1;
-assign LED_USER  = ioctl_download;
-assign LED_DISK  = 0;
+assign ADC_BUS  = 'Z;
+assign USER_OUT = '1;
+assign {UART_RTS, UART_TXD, UART_DTR} = 0;
+assign {SD_SCK, SD_MOSI, SD_CS} = 'Z;
+assign {SDRAM_DQ, SDRAM_A, SDRAM_BA, SDRAM_CLK, SDRAM_CKE, SDRAM_DQML, SDRAM_DQMH, SDRAM_nWE, SDRAM_nCAS, SDRAM_nRAS, SDRAM_nCS} = 'Z;
+
+assign VGA_F1 = 0;
+assign VGA_SCALER = 0;
+assign HDMI_FREEZE = 0;
+assign VGA_DISABLE = 0;
+
+assign AUDIO_MIX = 0;
+
+assign LED_USER  = rom_download;
+assign LED_DISK = 0;
 assign LED_POWER = 0;
+assign BUTTONS = 0;
+
+assign FB_FORCE_BLANK = '0;
 
 wire [1:0] ar = status[15:14];
 
@@ -198,12 +260,10 @@ wire  [7:0] pd1, pd2;
 
 wire [21:0] gamma_bus;
 
-hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
+hps_io #(.CONF_STR(CONF_STR)) hps_io
 (
 	.clk_sys(clk_sys),
 	.HPS_BUS(HPS_BUS),
-
-	.conf_str(CONF_STR),
 
 	.buttons(buttons),
 	.status(status),
@@ -211,6 +271,7 @@ hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
 	.forced_scandoubler(forced_scandoubler),
 	.gamma_bus(gamma_bus),
 	.direct_video(direct_video),
+	.video_rotated(video_rotated),
 
 	.ioctl_download(ioctl_download),
 	.ioctl_upload(ioctl_upload),
@@ -223,8 +284,8 @@ hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
 
 	.joystick_0(joy1),
 	.joystick_1(joy2),
-	.joystick_analog_0(joy1a),
-	.joystick_analog_1(joy2a),
+	.joystick_l_analog_0(joy1a),
+	.joystick_l_analog_1(joy2a),
 
 	.spinner_0(sp1),
 	.spinner_1(sp2),
@@ -467,6 +528,8 @@ wire [2:0] b;
 wire rotate_ccw = 1'b0;
 
 wire no_rotate = status[2] | direct_video | landscape;
+wire flip = 0;
+wire video_rotated;
 screen_rotate screen_rotate (.*);
 
 wire hires = status[13] && !status[5:3];
