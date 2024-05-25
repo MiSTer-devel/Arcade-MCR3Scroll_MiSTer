@@ -607,7 +607,7 @@ mcr3scroll mcr3scroll
 	.dl_data      ( ioctl_dout ),
 	.dl_nvram_wr(ioctl_wr & (ioctl_index=='d4)), 
 	.dl_din(ioctl_din),
-	.dl_nvram(ioctl_index=='d4),
+	.dl_nvram(ioctl_index=='d4)
 
 );
 
