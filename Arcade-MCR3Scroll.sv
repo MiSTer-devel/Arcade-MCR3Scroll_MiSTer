@@ -337,9 +337,9 @@ sdram sdram
 	.cpu1_addr     ( rom_download ? 16'hffff : {1'b0, rom_addr[15:1]} ),
 	.cpu1_q        ( rom_do ),
 
-	// need higher priority for CSD
-	.cpu2_addr     ( (rom_download | mod_crater) ? 16'hffff : {2'b10, csd_addr[14:1]} ),
-	.cpu2_q        ( csd_do ),
+	// CSD ROM is in block RAM (see csd_rom_hi/lo)
+	.cpu2_addr     ( 16'hffff ),
+	.cpu2_q        ( ),
 	.cpu3_addr     ( ),
 	.cpu3_q        ( ),
 
@@ -390,6 +390,36 @@ dpram #(8,14) sndrom
 	.clk_b(clk_sys),
 	.addr_b(snd_addr),
 	.q_b(snd_do)
+);
+
+// Cheap Squeak Deluxe 68000 program ROM (32KB) in block RAM so the 68000 runs
+// at full 8MHz with no wait states, like MAME. From SDRAM it needed a DTACK delay
+// that slowed the music (tempo and pitch) and could still return stale data.
+// Download 0x10000-0x17FFF: u17,u18 (low byte) then u7,u8 (high byte)
+wire csd_rom_we = ioctl_wr & rom_download & (ioctl_addr[24:15] == 10'd2);
+
+dpram #(8,14) csd_rom_hi
+(
+	.clk_a(clk_sys),
+	.we_a(csd_rom_we & ioctl_addr[14]),
+	.addr_a(ioctl_addr[13:0]),
+	.d_a(ioctl_dout),
+
+	.clk_b(clk_sys),
+	.addr_b(csd_addr[14:1]),
+	.q_b(csd_do[15:8])
+);
+
+dpram #(8,14) csd_rom_lo
+(
+	.clk_a(clk_sys),
+	.we_a(csd_rom_we & ~ioctl_addr[14]),
+	.addr_a(ioctl_addr[13:0]),
+	.d_a(ioctl_dout),
+
+	.clk_b(clk_sys),
+	.addr_b(csd_addr[14:1]),
+	.q_b(csd_do[7:0])
 );
 
 wire service = sw[1][0];
@@ -561,8 +591,12 @@ assign AUDIO_S = 0;
 wire [15:0] audio_l, audio_r;
 wire  [9:0] csd_audio;
 
-assign AUDIO_L = audio_l + { csd_audio, 5'd0 };
-assign AUDIO_R = audio_r + { csd_audio, 5'd0 };
+// SSIO + CSD mix: sum in 17 bits and saturate, the plain 16-bit add wrapped
+// around on loud passages (SSIO up to ~48.7k + CSD up to ~32.7k) causing crackles
+wire [16:0] mix_l = audio_l + { csd_audio, 5'd0 };
+wire [16:0] mix_r = audio_r + { csd_audio, 5'd0 };
+assign AUDIO_L = mix_l[16] ? 16'hFFFF : mix_l[15:0];
+assign AUDIO_R = mix_r[16] ? 16'hFFFF : mix_r[15:0];
 
 mcr3scroll mcr3scroll
 (

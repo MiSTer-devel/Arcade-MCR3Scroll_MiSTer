@@ -164,6 +164,8 @@ architecture struct of mcr_sound_board is
  signal snd_1    : std_logic_vector(17 downto 0);
  signal snd_2    : std_logic_vector(17 downto 0);
  signal snd_mono : std_logic_vector(18 downto 0);
+ signal ay2_iob_oe_l : std_logic;
+ signal ssio_mute    : std_logic;
  
 begin
 
@@ -395,8 +397,11 @@ end process;
 
 snd_mono <= ('0'&snd_1) + ('0'&snd_2);
 
-audio_out_l <= snd_1(17 downto 2) when separate_audio = '1' else snd_mono(18 downto 3);
-audio_out_r <= snd_2(17 downto 2) when separate_audio = '1' else snd_mono(18 downto 3);
+-- global mute : AY#2 port B7 (as MAME midway_ssio portb1_w), only when port B is an output
+ssio_mute <= ay2_port_b(7) and not ay2_iob_oe_l;
+
+audio_out_l <= (others => '0') when ssio_mute = '1' else snd_1(17 downto 2) when separate_audio = '1' else snd_mono(18 downto 3);
+audio_out_r <= (others => '0') when ssio_mute = '1' else snd_2(17 downto 2) when separate_audio = '1' else snd_mono(18 downto 3);
 
 ------------------------------
 -- components & sound board --
@@ -517,7 +522,7 @@ port map(
   -- port b
   I_IOB      => (others => '0'), -- in  std_logic_vector(7 downto 0); -- pin 13 to 6
   O_IOB      => ay2_port_b,      -- out std_logic_vector(7 downto 0); -- pin 13 to 6
-  O_IOB_OE_L => open,            -- out std_logic;
+  O_IOB_OE_L => ay2_iob_oe_l,            -- out std_logic;
 
   ENA        => cpu_ena,   -- in  std_logic; -- clock enable for higher speed operation
   RESET_L    => reset_n,   -- in  std_logic;

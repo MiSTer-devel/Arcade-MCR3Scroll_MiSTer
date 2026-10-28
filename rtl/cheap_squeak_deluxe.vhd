@@ -188,7 +188,9 @@ begin
 end process;
 
 cpu_sel <= '1' when cpu_as_n = '0' and (cpu_uds_n = '0' or cpu_lds_n = '0') else '0';
-cpu_dtack_n <= not ((cs_rom and romd) or cs_ram or cs_pia);
+-- ROM is block RAM (1 clock latency): no wait states, full speed like MAME.
+-- The old ROMD delay added ~2 wait states per ROM bus cycle and slowed the music.
+cpu_dtack_n <= not (cs_rom or cs_ram or cs_pia);
 
 -- auto-vectored interrupt handling
 cpu_vpa_n <= '0' when cpu_fc = "111" else '1';
