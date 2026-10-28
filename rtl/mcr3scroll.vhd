@@ -233,9 +233,9 @@ architecture struct of mcr3scroll is
  signal hoffset      : std_logic_vector(10 downto 0);
  signal hshift       : std_logic_vector(11 downto 0);
  signal voffset      : std_logic_vector( 8 downto 0);
- signal hoffset_l    : std_logic_vector(10 downto 0); -- scroll latched once per 30Hz game frame
+ signal hoffset_l    : std_logic_vector(10 downto 0);
  signal voffset_l    : std_logic_vector( 8 downto 0);
- signal hoffset_v    : std_logic_vector(10 downto 0); -- scroll used by the background machine
+ signal hoffset_v    : std_logic_vector(10 downto 0);
  signal voffset_v    : std_logic_vector( 8 downto 0);
  signal vshift       : std_logic_vector( 9 downto 0);
 
@@ -389,10 +389,6 @@ begin
 				if hcnt = 633 then
 					hcnt <= (others=>'0');
 					vcnt <= vcnt + 1;
-					-- 634 x 526 @ 20MHz / 634 x 263 @ 10MHz = 59.973Hz (original ~59.99Hz).
-					-- Was 525 / 264 lines = 60.087Hz / 59.746Hz; 59.746Hz (the default 15kHz
-					-- path, also used for HDMI) made the scaler drop/repeat a frame every ~4s
-					-- with vsync_adjust=0, breaking the 2:2 cadence of the 30Hz game.
 					if (vcnt = 525 and tv15Khz_mode = '0') or (vcnt = 262 and tv15Khz_mode = '1') then
 						vcnt <= (others=>'0');
 						top_frame <= not top_frame;
@@ -588,12 +584,6 @@ begin
 			if  cpu_addr(7 downto 0) = X"86" then voffset( 7 downto 0) <= cpu_do;       end if;	
 		end if;
 
-		-- Spy Hunter / Turbo Tag run a 30Hz game loop from CTC ch3 (line 493, top_frame = 1).
-		-- The ISR writes the scroll registers only after its object/sprite update, which in
-		-- the 60Hz progressive/field output can land inside the active display of the next
-		-- frame, tearing it (one half old scroll, one half new) => intermittent judder.
-		-- Latch scroll near the end of the following frame (top_frame = 0), just before
-		-- vshift reload, so both frames of each 30Hz pair use one consistent value.
 		if pix_ena = '1' and hcnt = 0 and top_frame = '0' and
 			((vcnt = 520 and tv15Khz_mode = '0') or (vcnt = 260 and tv15Khz_mode = '1')) then
 			hoffset_l <= hoffset;
@@ -602,7 +592,6 @@ begin
 	end if;
 end process;
 
--- Crater Raider keeps the original live scroll registers (60Hz VBLANK driven game)
 hoffset_v <= hoffset when mod_crater = '1' else hoffset_l;
 voffset_v <= voffset when mod_crater = '1' else voffset_l;
 
@@ -680,8 +669,6 @@ end process;
 
 sp_ram_cache_addr <= cpu_addr(8 downto 0) when hcnt(0) = '0' else sp_ram_addr;
 
--- copy sprite cache once per 30Hz game frame (same frame as the scroll latch) so a
--- sprite update still in progress at line 500 of the interrupt frame is not displayed half done
 move_buf    <= '1' when ((vcnt(8 downto 1) = 250 and tv15Khz_mode = '0') or (vcnt(7 downto 1) = 125 and tv15Khz_mode = '1')) and
                         (top_frame = '0' or mod_crater = '1') else '0'; -- line 500-501
 sp_ram_addr <= vcnt(0) & hcnt(8 downto 1) when move_buf = '1' else sp_cnt & sp_input_phase(1 downto 0);
@@ -797,8 +784,8 @@ begin
 				hshift <= hshift + 1 ;
 			end if;
 			
-			if (vflip(9 downto 1) = "100000110"  and tv15Khz_mode = '1') or  -- last line of field (262)
-				(vflip(9 downto 0) = "1000001101" and tv15Khz_mode = '0') then  -- last line of frame (525), tune background v pos w.r.t char
+			if (vflip(9 downto 1) = "100000110"  and tv15Khz_mode = '1') or
+				(vflip(9 downto 0) = "1000001101" and tv15Khz_mode = '0') then  -- tune background v pos w.r.t char
 				vshift <= voffset_v & '0'; 
 			else
 				if hcnt = shpos then 
