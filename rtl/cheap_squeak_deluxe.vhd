@@ -188,7 +188,7 @@ begin
 end process;
 
 cpu_sel <= '1' when cpu_as_n = '0' and (cpu_uds_n = '0' or cpu_lds_n = '0') else '0';
-cpu_dtack_n <= not ((cs_rom and romd) or cs_ram or cs_pia);
+cpu_dtack_n <= not (cs_rom or cs_ram or cs_pia);
 
 -- auto-vectored interrupt handling
 cpu_vpa_n <= '0' when cpu_fc = "111" else '1';

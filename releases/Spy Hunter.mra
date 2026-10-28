@@ -28,9 +28,9 @@
 	<num_buttons>1</num_buttons>
 	<buttons default="A,B,X,Y,Start,R,Select" names="Machine Guns,Missiles,Smoke Screen,Oil Slick,Van/Start,Gear Shift,Coin"></buttons>
 
-	<switches default="FF 00">
+	<switches default="FD 00">
 		<dip bits="0" ids="1:00,1:30" name="Game Timer"></dip>
-		<dip bits="1" ids="Off,On" name="Demo Sounds"></dip>
+		<dip bits="1" ids="On,Off" name="Demo Sounds"></dip>
 		<dip bits="8" ids="Off,On" name="Service"></dip>
 		</switches>
 
